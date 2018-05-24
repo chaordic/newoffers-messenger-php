@@ -2,5 +2,9 @@
 VERSION 0  FIRST RELEASE
 ========================
 
+   Version 0.1 - Integrate laravel/lumen
+      24/05/2018 11:16  0.1.0  initial release
+         dd13320 Add messenger facade and service provider for laravel/lumen
+
    Version 0.0 - First release
       22/05/2018 14:41  0.0.1  initial release
