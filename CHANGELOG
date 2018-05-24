@@ -3,6 +3,8 @@ VERSION 0  FIRST RELEASE
 ========================
 
    Version 0.1 - Integrate laravel/lumen
+      24/05/2018 17:48  0.1.1  Fix service provider sns bind
+         90167ea Fix service provider sns bind
       24/05/2018 11:16  0.1.0  initial release
          dd13320 Add messenger facade and service provider for laravel/lumen
 

@@ -1,6 +1,6 @@
 {
     "name": "linx/messenger",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "message pub/sub service",
     "type": "library",
     "license": "MIT",
