@@ -3,7 +3,6 @@
 namespace Linx\Messenger;
 
 use Illuminate\Support\Facades\Facade;
-use Linx\Messenger\Messenger;
 
 class MessengerFacade extends Facade
 {

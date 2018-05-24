@@ -4,20 +4,21 @@ namespace Linx\Messenger;
 
 use Illuminate\Support\ServiceProvider;
 use Linx\Messenger\Contracts\MessengerClient;
-use Aws\Sns\SnsClient;
+use Aws\Sns\SnsClient as AwsSnsClient;
+use Linx\Messenger\Clients\Sns;
 
 class MessengerServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        $this->bindSns();
+        $this->bindAwsSns();
 
-        $this->app->bind(MessengerClient::class, SnsClient::class);
+        $this->app->bind(MessengerClient::class, Sns::class);
     }
 
-    private function bindSns()
+    private function bindAwsSns()
     {
-        $this->app->bind(SnsClient::class, function () {
+        $this->app->bind(AwsSnsClient::class, function () {
             $credentials = [];
             if (config('aws.key')) {
                 $credentials['credentials'] = [
@@ -34,7 +35,7 @@ class MessengerServiceProvider extends ServiceProvider
                 $credentials['version'] = config('aws.version');
             }
 
-            return new SnsClient($credentials);
+            return new AwsSnsClient($credentials);
         });
     }
 }
