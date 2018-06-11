@@ -3,6 +3,7 @@
 namespace Linx\Messenger\Clients;
 
 use Linx\Messenger\Contracts\MessengerClient;
+use Linx\Messenger\Exceptions\NoResourceFoundException;
 use Aws\Sns\SnsClient;
 use Exception;
 
@@ -53,8 +54,13 @@ class Sns implements MessengerClient
 
     private function getArnFromName($name)
     {
+        $topics = $this->getArnTopics();
+        if (empty($topics)) {
+            throw new NoResourceFoundException();
+        }
+
         $region = $this->snsClient->getRegion();
-        $owner = (explode(':', $this->getArnTopics()[0]))[4];
+        $owner = (explode(':', $topics[0]))[4];
 
         return "arn:aws:sns:{$region}:{$owner}:{$name}";
     }
@@ -65,6 +71,18 @@ class Sns implements MessengerClient
         $name = end($parts);
 
         return $name;
+    }
+
+    private function getDataToPublish(string $topic, array $message) : array
+    {
+        //Up to 256KB of Unicode text.
+        $messageEncoded = json_encode($message);
+
+        return [
+            'TopicArn' => $this->getArnFromName($topic),
+            'MessageStructure' => 'json',
+            'Message' => json_encode(['default' => $messageEncoded]),
+        ];
     }
 
     public function createTopic(string $name): bool
@@ -151,24 +169,23 @@ class Sns implements MessengerClient
 
     public function publish(string $topic, array $message): bool
     {
-        //Up to 256KB of Unicode text.
-        $messageEncoded = json_encode($message);
-
-        $publishData = [
-            'TopicArn' => $this->getArnFromName($topic),
-            'MessageStructure' => 'json',
-            'Message' => json_encode(['default' => $messageEncoded]),
-        ];
-
         try {
-            $this->snsClient->publish($publishData);
+            $data = $this->getDataToPublish($topic, $message);
+            $this->snsClient->publish($data);
         } catch (\Aws\Sns\Exception\SnsException $e) {
             if ('NotFound' !== $e->getAwsErrorCode()) {
                 throw $e;
             }
 
             $this->createTopic($topic);
-            $this->snsClient->publish($publishData);
+
+            $data = $this->getDataToPublish($topic, $message);
+            $this->snsClient->publish($data);
+        } catch (NoResourceFoundException $e) {
+            $this->createTopic($topic);
+
+            $data = $this->getDataToPublish($topic, $message);
+            $this->snsClient->publish($data);
         }
 
         return true;
