@@ -73,7 +73,7 @@ class Sns implements MessengerClient
         return $name;
     }
 
-    private function getDataToPublish($topic, $message)
+    private function getDataToPublish(string $topic, array $message) : array
     {
         //Up to 256KB of Unicode text.
         $messageEncoded = json_encode($message);
