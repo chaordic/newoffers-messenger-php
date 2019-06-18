@@ -30,7 +30,7 @@ class Sns implements MessengerClient
             array_push($this->topics, $this->getNameFromArn($topic['TopicArn']));
         });
 
-        if($nextToken !== false) {
+        if (false !== $nextToken) {
             $this->refreshTopics($nextToken);
         }
     }
@@ -80,7 +80,7 @@ class Sns implements MessengerClient
         return $name;
     }
 
-    private function getDataToPublish(string $topic, array $message) : array
+    private function getDataToPublish(string $topic, array $message): array
     {
         //Up to 256KB of Unicode text.
         $messageEncoded = json_encode($message);
