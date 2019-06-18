@@ -20,12 +20,19 @@ class Sns implements MessengerClient
         $this->snsClient = $snsClient;
     }
 
-    private function refreshTopics()
+    private function refreshTopics($token = null)
     {
-        array_walk($this->snsClient->listTopics()->toArray()['Topics'], function ($topic) {
+        $topics = $this->snsClient->listTopics(['NextToken' => $token])->toArray();
+        $nextToken = $topics['NextToken'] ?? false;
+
+        array_walk($topics['Topics'], function ($topic) {
             array_push($this->arnTopics, $topic['TopicArn']);
             array_push($this->topics, $this->getNameFromArn($topic['TopicArn']));
         });
+
+        if($nextToken !== false) {
+            $this->refreshTopics($nextToken);
+        }
     }
 
     private function getTopics()
