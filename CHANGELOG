@@ -3,6 +3,8 @@ VERSION 1  RELEASE 1.0.0
 ========================
 
    Version 1.0 - Release 1.0.0
+      18/06/2019 14:21  1.0.2  Release patch
+         522d241 [NO-14432] Fix get sns topics
       11/06/2018 10:53  1.0.1  bug fix
          059d50b Add type hint
          367c3ea Add new error handling on publish() method
