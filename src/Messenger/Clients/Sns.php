@@ -11,6 +11,10 @@ class Sns implements MessengerClient
 {
     private $snsClient;
 
+    private $accountId;
+
+    private $region;
+
     private $arnTopics = [];
 
     private $topics = [];
@@ -30,7 +34,7 @@ class Sns implements MessengerClient
             array_push($this->topics, $this->getNameFromArn($topic['TopicArn']));
         });
 
-        if (false !== $nextToken) {
+        if($nextToken !== false) {
             $this->refreshTopics($nextToken);
         }
     }
@@ -61,15 +65,23 @@ class Sns implements MessengerClient
 
     private function getArnFromName($name)
     {
-        $topics = $this->getArnTopics();
-        if (empty($topics)) {
-            throw new NoResourceFoundException();
+        if(!$this->region) {
+            $this->region = $this->snsClient->getRegion();
         }
 
-        $region = $this->snsClient->getRegion();
-        $owner = (explode(':', $topics[0]))[4];
+        if(!$this->accountId) {
+            $this->accountId = getenv("AWS_ACCOUNT_ID");
+        }
 
-        return "arn:aws:sns:{$region}:{$owner}:{$name}";
+        if(!$this->accountId) {
+            $topics = $this->getArnTopics();
+            if (empty($topics)) {
+                throw new NoResourceFoundException();
+            }
+            $this->accountId = (explode(':', $topics[0]))[4];
+        }
+
+        return "arn:aws:sns:{$this->region}:{$this->accountId}:{$name}";
     }
 
     private function getNameFromArn($arn)
@@ -80,7 +92,7 @@ class Sns implements MessengerClient
         return $name;
     }
 
-    private function getDataToPublish(string $topic, array $message): array
+    private function getDataToPublish(string $topic, array $message) : array
     {
         //Up to 256KB of Unicode text.
         $messageEncoded = json_encode($message);
