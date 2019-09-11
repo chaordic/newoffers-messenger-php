@@ -13,6 +13,8 @@ class MessengerServiceProvider extends ServiceProvider
     {
         $this->bindAwsSns();
 
+        $this->bindSnsClient();
+
         $this->app->bind(MessengerClient::class, Sns::class);
     }
 
@@ -36,6 +38,16 @@ class MessengerServiceProvider extends ServiceProvider
             }
 
             return new AwsSnsClient($credentials);
+        });
+    }
+
+    private function bindSnsClient()
+    {
+        $this->app->bind(Sns::class, function($app){
+            return new Sns(
+                $app->make(AwsSnsClient::class),
+                config('aws.account_id')
+            );
         });
     }
 }

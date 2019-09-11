@@ -19,9 +19,10 @@ class Sns implements MessengerClient
 
     private $topics = [];
 
-    public function __construct(SnsClient $snsClient)
+    public function __construct(SnsClient $snsClient, string $accountId = null)
     {
         $this->snsClient = $snsClient;
+        $this->accountId = $accountId;
     }
 
     private function refreshTopics($token = null)
@@ -67,10 +68,6 @@ class Sns implements MessengerClient
     {
         if(!$this->region) {
             $this->region = $this->snsClient->getRegion();
-        }
-
-        if(!$this->accountId) {
-            $this->accountId = getenv("AWS_ACCOUNT_ID");
         }
 
         if(!$this->accountId) {
