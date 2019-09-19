@@ -74,6 +74,35 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->snsClient->publish('topic', ['message']));
     }
 
+    public function testPublishWithMessageAttributes()
+    {
+        $this->awsSnsMock->shouldReceive('listTopics->toArray')->andReturn(['Topics' => [
+            ['TopicArn' => 'arn:aws:sns:us-east-1:owner:topic'],
+        ]]);
+
+        $this->awsSnsMock
+            ->shouldReceive('getRegion')
+            ->once()
+            ->andReturn('us-east-1');
+
+        $this->awsSnsMock->shouldReceive('publish')
+            ->with([
+                'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic',
+                'MessageStructure' => 'json',
+                'Message' => '{"default":"[\"message\"]"}',
+                'MessageAttributes' => [
+                    'atttribute1' => [
+                        'DataType' => 'String',
+                        'StringValue' => 'atrribute_value'
+                    ],
+                ],
+            ])
+            ->once()
+            ->andReturn(true);
+
+        $this->assertTrue($this->snsClient->publish('topic', ['message']));
+    }
+
     public function testSubscribeHttp()
     {
         $this->awsSnsMock->shouldReceive('listTopics->toArray')->andReturn(['Topics' => [
