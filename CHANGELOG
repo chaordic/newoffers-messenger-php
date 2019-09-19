@@ -2,6 +2,10 @@
 VERSION 1  RELEASE 1.0.0
 ========================
 
+   Version 1.1 - Add message attributes
+      19/09/2019 18:54  1.1.0  initial release
+         2c5c5f3 add message attributes (#5)
+
    Version 1.0 - Release 1.0.0
       11/09/2019 17:52  1.0.4  Release patch
          4b4f32e Move account id to construct (#4)
