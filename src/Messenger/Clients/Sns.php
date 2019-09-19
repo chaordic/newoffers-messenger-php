@@ -89,7 +89,7 @@ class Sns implements MessengerClient
         return $name;
     }
 
-    private function getDataToPublish(string $topic, array $message) : array
+    private function getDataToPublish(string $topic, array $message, $messageAttributes = []) : array
     {
         //Up to 256KB of Unicode text.
         $messageEncoded = json_encode($message);
@@ -98,6 +98,7 @@ class Sns implements MessengerClient
             'TopicArn' => $this->getArnFromName($topic),
             'MessageStructure' => 'json',
             'Message' => json_encode(['default' => $messageEncoded]),
+            'MessageAttributes' => $messageAttributes,
         ];
     }
 
@@ -183,10 +184,10 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function publish(string $topic, array $message): bool
+    public function publish(string $topic, array $message, $messageAttributes = []): bool
     {
         try {
-            $data = $this->getDataToPublish($topic, $message);
+            $data = $this->getDataToPublish($topic, $message, $messageAttributes);
             $this->snsClient->publish($data);
         } catch (\Aws\Sns\Exception\SnsException $e) {
             if ('NotFound' !== $e->getAwsErrorCode()) {

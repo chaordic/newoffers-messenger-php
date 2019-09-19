@@ -76,4 +76,20 @@ class MessengerTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->messenger->publish('topic', ['message-to-publish']));
     }
+
+    public function testPublishWithMessageAttributes()
+    {
+        $this->clientMock->shouldReceive('publish')
+            ->with('topic', ['message-to-publish'],[])
+            ->once()
+            ->andReturn(true);
+
+        $messageAttibutes = ['MessageAttributes' => [
+            'atttribute1' => [
+                'DataType' => 'String',
+                'StringValue' => 'atrribute_value'
+            ],
+        ]];
+        $this->assertTrue($this->messenger->publish('topic', ['message-to-publish'], $messageAttibutes));
+    }
 }

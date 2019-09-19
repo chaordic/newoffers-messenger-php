@@ -50,8 +50,8 @@ class Messenger
         return $this->getClient()->unsubscribe($topic, $subscription);
     }
 
-    public function publish(string $topic, array $message)
+    public function publish(string $topic, array $message, $messageAttributes = [])
     {
-        return $this->getClient()->publish($topic, $message);
+        return $this->getClient()->publish($topic, $message, $messageAttributes);
     }
 }

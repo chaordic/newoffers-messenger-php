@@ -14,5 +14,5 @@ interface MessengerClient
 
     public function unsubscribe(string $topic, string $subscriptionId): bool;
 
-    public function publish(string $topic, array $message): bool;
+    public function publish(string $topic, array $message, array $messageAttributes): bool;
 }
