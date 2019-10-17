@@ -207,4 +207,56 @@ class Sns implements MessengerClient
 
         return true;
     }
+
+    public function publishAsync(array $data)
+    {
+        $promises = array_map(function($message) {
+            $dataToPublish = $this->getDataToPublish($message['topic'], $message['message'], $message['messageAttributes']??[]);
+            return $this->snsClient->publishAsync($dataToPublish);
+        }, $data);
+
+        $results = \GuzzleHttp\Promise\settle($promises)->wait();
+        $erros = array_filter($results, function($promise) {
+            return $promise['state'] === 'rejected';
+        });
+
+        $messagesIds = [];
+
+        if (!empty($erros)) {
+            $messagesIds = array_merge($messagesIds, array_map(function ($error){
+                
+                $topicArn = $error['reason']->getCommand()->get('TopicArn');
+                preg_match('/.+(:.+)$/', $topicArn, $matches, PREG_OFFSET_CAPTURE);
+                $topic = str_replace(':','', $matches[1][0]);
+
+                $dataMessage = json_decode($error['reason']->getCommand()->get('Message'), true);
+                $message = json_decode($dataMessage['default'], true);
+
+                if ($error['reason'] instanceof \Aws\Sns\Exception\SnsException) {
+                    $this->createTopic($topic);
+    
+                    $data = $this->getDataToPublish($topic, $message);
+                    $result = $this->snsClient->publish($data);
+                    return $result->get('MessageId');
+                }
+
+                if ($error['reason'] instanceof NoResourceFoundException) {
+                    $this->createTopic($topic);
+    
+                    $data = $this->getDataToPublish($topic, $message);
+                    $result = $this->snsClient->publish($data);
+                    return $result->get('MessageId');
+                }
+            }, $erros));
+        }
+        
+        $fulfilled = array_filter($results, function($promise) {
+            return $promise['state'] === 'fulfilled';
+        });
+        
+        $messagesIds = array_merge($messagesIds, array_map(function($promise){
+            return $promise['value']->get('MessageId');
+        }, $fulfilled));
+        return $messagesIds;
+    }
 }

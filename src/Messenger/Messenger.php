@@ -54,4 +54,9 @@ class Messenger
     {
         return $this->getClient()->publish($topic, $message, $messageAttributes);
     }
+
+    public function publishAsync(array $message)
+    {
+        return $this->getClient()->publishAsync($message);
+    }
 }
