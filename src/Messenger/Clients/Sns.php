@@ -2,10 +2,12 @@
 
 namespace Linx\Messenger\Clients;
 
+use Exception;
+use Aws\Sns\SnsClient;
+use GuzzleHttp\Promise;
+use Aws\Sns\Exception\SnsException;
 use Linx\Messenger\Contracts\MessengerClient;
 use Linx\Messenger\Exceptions\NoResourceFoundException;
-use Aws\Sns\SnsClient;
-use Exception;
 
 class Sns implements MessengerClient
 {
@@ -189,7 +191,7 @@ class Sns implements MessengerClient
         try {
             $data = $this->getDataToPublish($topic, $message, $messageAttributes);
             $this->snsClient->publish($data);
-        } catch (\Aws\Sns\Exception\SnsException $e) {
+        } catch (SnsException $e) {
             if ('NotFound' !== $e->getAwsErrorCode()) {
                 throw $e;
             }
@@ -211,11 +213,15 @@ class Sns implements MessengerClient
     public function publishAsync(array $data)
     {
         $promises = array_map(function($message) {
-            $dataToPublish = $this->getDataToPublish($message['topic'], $message['message'], $message['messageAttributes']??[]);
+            $dataToPublish = $this->getDataToPublish(
+                $message['topic'],
+                $message['message'],
+                $message['messageAttributes'] ?? []
+            );
             return $this->snsClient->publishAsync($dataToPublish);
         }, $data);
 
-        $results = \GuzzleHttp\Promise\settle($promises)->wait();
+        $results = Promise\settle($promises)->wait();
         $erros = array_filter($results, function($promise) {
             return $promise['state'] === 'rejected';
         });
@@ -229,10 +235,17 @@ class Sns implements MessengerClient
                 preg_match('/.+(:.+)$/', $topicArn, $matches, PREG_OFFSET_CAPTURE);
                 $topic = str_replace(':','', $matches[1][0]);
 
-                $dataMessage = json_decode($error['reason']->getCommand()->get('Message'), true);
-                $message = json_decode($dataMessage['default'], true);
+                $dataMessage = json_decode(
+                    $error['reason']->getCommand()->get('Message'),
+                    true
+                );
+                
+                $message = json_decode(
+                    $dataMessage['default'],
+                    true
+                );
 
-                if ($error['reason'] instanceof \Aws\Sns\Exception\SnsException) {
+                if ($error['reason'] instanceof SnsException) {
                     $this->createTopic($topic);
     
                     $data = $this->getDataToPublish($topic, $message);
@@ -257,6 +270,7 @@ class Sns implements MessengerClient
         $messagesIds = array_merge($messagesIds, array_map(function($promise){
             return $promise['value']->get('MessageId');
         }, $fulfilled));
+        
         return $messagesIds;
     }
 }
