@@ -210,7 +210,7 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function publishAsync(array $data)
+    public function publishAsync(array $data): array
     {
         $promises = array_map(function($message) {
             $dataToPublish = $this->getDataToPublish(
@@ -245,15 +245,10 @@ class Sns implements MessengerClient
                     true
                 );
 
-                if ($error['reason'] instanceof SnsException) {
-                    $this->createTopic($topic);
-    
-                    $data = $this->getDataToPublish($topic, $message);
-                    $result = $this->snsClient->publish($data);
-                    return $result->get('MessageId');
-                }
-
-                if ($error['reason'] instanceof NoResourceFoundException) {
+                if (
+                    $error['reason'] instanceof SnsException ||
+                    $error['reason'] instanceof NoResourceFoundException
+                ) {
                     $this->createTopic($topic);
     
                     $data = $this->getDataToPublish($topic, $message);
