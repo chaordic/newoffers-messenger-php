@@ -13,8 +13,22 @@ interface MessengerClient
     public function confirmSubscription(string $topic, string $token): bool;
 
     public function unsubscribe(string $topic, string $subscriptionId): bool;
-
+    
     public function publish(string $topic, array $message, array $messageAttributes): bool;
-
-    public function publishAsync(array $message): array;
+    
+    /**
+     * $messages = [
+     *   0 => [
+     *    'topic' => '',
+     *    'message' => [],
+     *    'messageAttributes' => []
+     *  ]
+     * ]
+     *
+     * Publish Async receive a array of messages to be sent as async
+     *
+     * @param array $messages
+     * @return array
+     **/
+    public function publishAsync(array $messages): array;
 }

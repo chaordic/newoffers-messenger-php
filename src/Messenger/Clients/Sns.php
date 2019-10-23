@@ -210,7 +210,21 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function publishAsync(array $data): array
+    /**
+     * $messages = [
+     *   0 => [
+     *    'topic' => '',
+     *    'message' => [],
+     *    'messageAttributes' => []
+     *  ]
+     * ]
+     *
+     * Publish Async receive a array of messages to be sent as async, example above
+     *
+     * @param array $messages
+     * @return array
+     **/
+    public function publishAsync(array $messages): array
     {
         $promises = array_map(function($message) {
             $dataToPublish = $this->getDataToPublish(
@@ -219,7 +233,7 @@ class Sns implements MessengerClient
                 $message['messageAttributes'] ?? []
             );
             return $this->snsClient->publishAsync($dataToPublish);
-        }, $data);
+        }, $messages);
 
         $results = Promise\settle($promises)->wait();
         $erros = array_filter($results, function($promise) {
