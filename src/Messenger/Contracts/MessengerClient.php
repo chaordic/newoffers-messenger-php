@@ -16,19 +16,5 @@ interface MessengerClient
     
     public function publish(string $topic, array $message, array $messageAttributes): bool;
     
-    /**
-     * $messages = [
-     *   0 => [
-     *    'topic' => '',
-     *    'message' => [],
-     *    'messageAttributes' => []
-     *  ]
-     * ]
-     *
-     * Publish Async receive a array of messages to be sent as async
-     *
-     * @param array $messages
-     * @return array
-     **/
-    public function publishAsync(array $messages): array;
+    public function publishAsync(string $topic, array $message, $messageAttributes = []);
 }
