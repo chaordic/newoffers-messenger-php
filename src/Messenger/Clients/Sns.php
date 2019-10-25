@@ -213,9 +213,9 @@ class Sns implements MessengerClient
     public function publishAsync(string $topic, array $message, $messageAttributes = [])
     {
         $dataToPublish = $this->getDataToPublish(
-            $message['topic'],
-            $message['message'],
-            $message['messageAttributes'] ?? []
+            $topic,
+            $message,
+            $messageAttributes
         );
 
         return $this->snsClient->publishAsync($dataToPublish)
