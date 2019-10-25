@@ -20,7 +20,7 @@ class MessengerTest extends PHPUnit_Framework_TestCase
     public function testCreateTopic()
     {
         $this->clientMock->shouldReceive('publish')
-            ->with('topic', ['message'])
+            ->with('topic', ['message'], [])
             ->once()
             ->andReturn(true);
 
@@ -70,26 +70,27 @@ class MessengerTest extends PHPUnit_Framework_TestCase
     public function testPublish()
     {
         $this->clientMock->shouldReceive('publish')
-            ->with('topic', ['message-to-publish'])
+            ->with('topic', ['message-to-publish'], [])
             ->once()
             ->andReturn(true);
 
-        $this->assertTrue($this->messenger->publish('topic', ['message-to-publish']));
+        $this->assertTrue($this->messenger->publish('topic', ['message-to-publish'], []));
     }
 
     public function testPublishWithMessageAttributes()
     {
-        $this->clientMock->shouldReceive('publish')
-            ->with('topic', ['message-to-publish'],[])
-            ->once()
-            ->andReturn(true);
-
-        $messageAttibutes = ['MessageAttributes' => [
+        $messageAttibutes = [
             'atttribute1' => [
                 'DataType' => 'String',
                 'StringValue' => 'atrribute_value'
             ],
-        ]];
+        ];
+
+        $this->clientMock->shouldReceive('publish')
+            ->with('topic', ['message-to-publish'], $messageAttibutes)
+            ->once()
+            ->andReturn(true);
+
         $this->assertTrue($this->messenger->publish('topic', ['message-to-publish'], $messageAttibutes));
     }
 }

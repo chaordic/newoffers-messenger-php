@@ -67,6 +67,7 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
                 'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic',
                 'MessageStructure' => 'json',
                 'Message' => '{"default":"[\"message\"]"}',
+                'MessageAttributes' => [],
             ])
             ->once()
             ->andReturn(true);
@@ -85,22 +86,26 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
             ->once()
             ->andReturn('us-east-1');
 
+        $messageAttibutes = [
+            'atttribute1' => [
+                'DataType' => 'String',
+                'StringValue' => 'atrribute_value'
+            ],
+        ];
+
+        $messageData = [
+            'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic',
+            'MessageStructure' => 'json',
+            'Message' => '{"default":"[\"message\"]"}',
+            'MessageAttributes' => $messageAttibutes,
+        ];
+
         $this->awsSnsMock->shouldReceive('publish')
-            ->with([
-                'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic',
-                'MessageStructure' => 'json',
-                'Message' => '{"default":"[\"message\"]"}',
-                'MessageAttributes' => [
-                    'atttribute1' => [
-                        'DataType' => 'String',
-                        'StringValue' => 'atrribute_value'
-                    ],
-                ],
-            ])
+            ->with($messageData)
             ->once()
             ->andReturn(true);
 
-        $this->assertTrue($this->snsClient->publish('topic', ['message']));
+        $this->assertTrue($this->snsClient->publish('topic', ['message'], $messageAttibutes));
     }
 
     public function testSubscribeHttp()
