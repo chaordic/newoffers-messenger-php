@@ -224,6 +224,9 @@ class Sns implements MessengerClient
             }, function (SqsException $e) use ($topic, $message, $messageAttributes) {
                 $this->createTopic($topic);
                 return $this->publishAsync($topic, $message, $messageAttributes);
+            }, function (NoResourceFoundException $ex) use ($topic, $message, $messageAttributes) {
+                $this->createTopic($topic);
+                return $this->publishAsync($topic, $message, $messageAttributes);
             });
     }
 }
