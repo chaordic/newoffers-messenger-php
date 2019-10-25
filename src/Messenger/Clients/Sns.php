@@ -4,7 +4,6 @@ namespace Linx\Messenger\Clients;
 
 use Exception;
 use Aws\Sns\SnsClient;
-use GuzzleHttp\Promise;
 use Aws\Sns\Exception\SnsException;
 use Linx\Messenger\Contracts\MessengerClient;
 use Linx\Messenger\Exceptions\NoResourceFoundException;
@@ -221,7 +220,7 @@ class Sns implements MessengerClient
         return $this->snsClient->publishAsync($dataToPublish)
             ->then(function ($result) {
                 return $result->get('MessageId');
-            }, function (SqsException $e) use ($topic, $message, $messageAttributes) {
+            }, function (SnsException $e) use ($topic, $message, $messageAttributes) {
                 $this->createTopic($topic);
                 return $this->publishAsync($topic, $message, $messageAttributes);
             }, function (NoResourceFoundException $ex) use ($topic, $message, $messageAttributes) {
