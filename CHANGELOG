@@ -2,6 +2,19 @@
 VERSION 1  RELEASE 1.0.0
 ========================
 
+   Version 1.2 - New release
+      28/10/2019 17:37  1.2.0  initial release
+         a87a50f add test to sns publishasync
+         dbfece0 change exception
+         4a54c27 add exception
+         63b8d37 fix attributes
+         2a6af37 refactory promise sns async
+         fd68f71 add doc
+         d204442 CR fix
+         825f639 CR fix namespace
+         1c9af4f feat send sns async
+         14d64a4 Resolving problems with unit tests
+
    Version 1.1 - Add message attributes
       19/09/2019 18:54  1.1.0  initial release
          2c5c5f3 add message attributes (#5)
