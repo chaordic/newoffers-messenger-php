@@ -2,6 +2,9 @@
 
 use Linx\Messenger\Clients\Sns;
 use Aws\Sns\SnsClient as AwsSns;
+use Aws\Sns\Exception\SnsException;
+use GuzzleHttp\Promise\RejectedPromise;
+use GuzzleHttp\Promise\FulfilledPromise;
 
 class SnsClientTest extends PHPUnit_Framework_TestCase
 {
@@ -269,5 +272,91 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
             ->andReturn(true);
 
         $this->assertTrue($this->snsClient->unsubscribe('unsubscribe-topic', 'subscription-id'));
+    }
+
+    public function testPublishAsync()
+    {
+        $this->awsSnsMock->shouldReceive('listTopics->toArray')->andReturn(['Topics' => [
+            ['TopicArn' => 'arn:aws:sns:us-east-1:owner:topic'],
+        ]]);
+
+        $this->awsSnsMock
+            ->shouldReceive('getRegion')
+            ->once()
+            ->andReturn('us-east-1');
+        
+        $mockCommand = Mockery::mock(Aws\Command::class);
+
+        $promiseF = new FulfilledPromise($mockCommand);
+
+        $mockCommand->shouldReceive('get')
+            ->with('MessageId')
+            ->andReturn('123');
+
+        $this->awsSnsMock->shouldReceive('publishAsync')
+            ->with([
+                'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic',
+                'MessageStructure' => 'json',
+                'Message' => '{"default":"[\"message\"]"}',
+                'MessageAttributes' => []
+            ])
+            ->once()
+            ->andReturn($promiseF);
+        
+        $promise = $this->snsClient->publishAsync(
+            'topic',
+            ['message']
+        );
+        $this->assertEquals('123', $promise->wait());
+    }
+
+    public function testPublishAsyncCreate()
+    {
+        $this->awsSnsMock->shouldReceive('listTopics->toArray')->andReturn(['Topics' => [
+            ['TopicArn' => 'arn:aws:sns:us-east-1:owner:topic'],
+        ]]);
+
+        $this->awsSnsMock
+            ->shouldReceive('getRegion')
+            ->once()
+            ->andReturn('us-east-1');
+        $mockCommand = Mockery::mock(Aws\Command::class);
+        $promiseRejected = new RejectedPromise(new SnsException("error", $mockCommand));
+        $promiseFulfilled = new FulfilledPromise($mockCommand);
+
+        $this->awsSnsMock->shouldReceive('publishAsync')
+            ->with([
+                'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic-new',
+                'MessageStructure' => 'json',
+                'Message' => '{"default":"[\"message\"]"}',
+                'MessageAttributes' => []
+            ])
+            ->once()
+            ->andThrow($promiseRejected);
+
+        $this->awsSnsMock->shouldReceive('createTopic')
+            ->with(['Name' => 'topic-new'])
+            ->once()
+            ->andReturn(true);
+
+        $this->awsSnsMock->shouldReceive('publishAsync')
+            ->with([
+                'TopicArn' => 'arn:aws:sns:us-east-1:owner:topic-new',
+                'MessageStructure' => 'json',
+                'Message' => '{"default":"[\"message\"]"}',
+                'MessageAttributes' => []
+            ])
+            ->once()
+            ->andReturn($promiseFulfilled);
+
+        $mockCommand->shouldReceive('get')
+            ->with('MessageId')
+            ->andReturn('123');
+
+        $promise = $this->snsClient->publishAsync(
+            'topic-new',
+            ['message']
+        );
+        $this->assertEquals('123', $promise->wait());
     }
 }

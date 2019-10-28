@@ -2,10 +2,11 @@
 
 namespace Linx\Messenger\Clients;
 
+use Exception;
+use Aws\Sns\SnsClient;
+use Aws\Sns\Exception\SnsException;
 use Linx\Messenger\Contracts\MessengerClient;
 use Linx\Messenger\Exceptions\NoResourceFoundException;
-use Aws\Sns\SnsClient;
-use Exception;
 
 class Sns implements MessengerClient
 {
@@ -189,7 +190,7 @@ class Sns implements MessengerClient
         try {
             $data = $this->getDataToPublish($topic, $message, $messageAttributes);
             $this->snsClient->publish($data);
-        } catch (\Aws\Sns\Exception\SnsException $e) {
+        } catch (SnsException $e) {
             if ('NotFound' !== $e->getAwsErrorCode()) {
                 throw $e;
             }
@@ -206,5 +207,25 @@ class Sns implements MessengerClient
         }
 
         return true;
+    }
+
+    public function publishAsync(string $topic, array $message, $messageAttributes = [])
+    {
+        $dataToPublish = $this->getDataToPublish(
+            $topic,
+            $message,
+            $messageAttributes
+        );
+
+        return $this->snsClient->publishAsync($dataToPublish)
+            ->then(function ($result) {
+                return $result->get('MessageId');
+            }, function (SnsException $e) use ($topic, $message, $messageAttributes) {
+                $this->createTopic($topic);
+                return $this->publishAsync($topic, $message, $messageAttributes);
+            }, function (NoResourceFoundException $ex) use ($topic, $message, $messageAttributes) {
+                $this->createTopic($topic);
+                return $this->publishAsync($topic, $message, $messageAttributes);
+            });
     }
 }
