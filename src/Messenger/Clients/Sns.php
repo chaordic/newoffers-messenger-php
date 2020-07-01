@@ -41,7 +41,7 @@ class Sns implements MessengerClient
         }
     }
 
-    private function getTopics()
+    public function getTopics()
     {
         if (empty($this->topics)) {
             $this->refreshTopics();
@@ -50,7 +50,7 @@ class Sns implements MessengerClient
         return $this->topics;
     }
 
-    private function getArnTopics()
+    public function getArnTopics()
     {
         if (empty($this->arnTopics)) {
             $this->refreshTopics();
