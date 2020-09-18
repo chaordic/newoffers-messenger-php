@@ -199,12 +199,12 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
             ->with([
                 'TopicArn' => 'arn:aws:sns:us-east-1:owner:created-topic',
                 'Protocol' => 'sqs',
-                'Endpoint' => 'arn:aws:sqs:us-east-1:064250947333:sqs-table',
+                'Endpoint' => 'arn:aws:sqs:us-east-1:064250947333:sqs-table-v2',
             ])
             ->once()
             ->andReturn(true);
 
-        $this->assertTrue($this->snsClient->subscribe('created-topic', 'arn:aws:sqs:us-east-1:064250947333:sqs-table'));
+        $this->assertTrue($this->snsClient->subscribe('created-topic', 'arn:aws:sqs:us-east-1:064250947333:sqs-table-v2'));
     }
 
     public function testSubscribeLambda()
@@ -223,12 +223,12 @@ class SnsClientTest extends PHPUnit_Framework_TestCase
             ->with([
                 'TopicArn' => 'arn:aws:sns:us-east-1:owner:created-topic',
                 'Protocol' => 'lambda',
-                'Endpoint' => 'arn:aws:lambda:us-east-1:064250947333:function:lambda-function',
+                'Endpoint' => 'arn:aws:lambda:us-east-1:064250947333:function:lambda-function-v2',
             ])
             ->once()
             ->andReturn(true);
 
-        $this->assertTrue($this->snsClient->subscribe('created-topic', 'arn:aws:lambda:us-east-1:064250947333:function:lambda-function'));
+        $this->assertTrue($this->snsClient->subscribe('created-topic', 'arn:aws:lambda:us-east-1:064250947333:function:lambda-function-v2'));
     }
 
     public function testConfirmSubscription()
