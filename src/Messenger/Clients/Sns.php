@@ -136,9 +136,9 @@ class Sns implements MessengerClient
     public function subscribe(string $topic, string $endpoint): bool
     {
         $match = function ($endpoint) {
-            if (preg_match('/^arn:aws:lambda:[a-z]{2}-[a-z]{3,12}-[1,2,3]:\d+:function:[a-zA-Z-_]{1,256}$/', $endpoint)) {
+            if (preg_match('/^arn:aws:lambda:[a-z]{2}-[a-z]{3,12}-[1,2,3]:\d+:function:[a-zA-Z0-9-_]{1,256}$/', $endpoint)) {
                 return 'lambda';
-            } elseif (preg_match('/^arn:aws:sqs:[a-z]{2}-[a-z]{3,12}-[1,2,3]:\d+:[a-zA-Z-_]{1,256}$/', $endpoint)) {
+            } elseif (preg_match('/^arn:aws:sqs:[a-z]{2}-[a-z]{3,12}-[1,2,3]:\d+:[a-zA-Z0-9-_]{1,256}$/', $endpoint)) {
                 return 'sqs';
             }
 
