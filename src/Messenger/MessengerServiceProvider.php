@@ -18,17 +18,18 @@ class MessengerServiceProvider extends ServiceProvider
         switch ($messengerClient) {
             case 'sns':
                 $this->bindAwsSns();
-                $this->bindSnsClient();
-                $this->app->bind(MessengerClient::class, Sns::class);
+                $this->bindSnsClient();       
+                $serviceToBind = Sns::class;
                 break;
             case 'serviceBus':
                 $this->bindAzureServiceBus();
                 $this->bindServiceBusClient();
-                $this->app->bind(MessengerClient::class, ServiceBus::class);
+                $serviceToBind = ServiceBus::class;
                 break;
             default:
                 break;
         }
+        $this->app->bind(MessengerClient::class, $serviceToBind);             
     }
 
     private function bindAwsSns()
