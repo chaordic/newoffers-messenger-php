@@ -1,6 +1,6 @@
 # Newoffers Messenger
 
-Newoffers Messenger is a Pub/Sub messaging provider using AWS SNS os Azure ServiceBus
+Newoffers Messenger is a Pub/Sub messaging provider using AWS SNS or Azure ServiceBus
 
 Use an environment variable `MESSENGER` to specify the selected service.
 
