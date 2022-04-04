@@ -2,14 +2,16 @@
 
 namespace Linx\Messenger\Clients;
 
-use Exception;
-use Aws\Sns\SnsClient;
 use Aws\Sns\Exception\SnsException;
+use Aws\Sns\SnsClient;
+use Exception;
 use Linx\Messenger\Contracts\MessengerClient;
 use Linx\Messenger\Exceptions\NoResourceFoundException;
 
 class Sns implements MessengerClient
 {
+
+    /** @var SnsClient  */
     private $snsClient;
 
     private $accountId;
@@ -133,7 +135,7 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function subscribe(string $topic, string $endpoint): bool
+    public function subscribe(string $topic, string $endpoint): string
     {
         $match = function ($endpoint) {
             if (preg_match('/^arn:aws:lambda:[a-z]{2}-[a-z]{3,12}-[1,2,3]:\d+:function:[a-zA-Z0-9-_]{1,256}$/', $endpoint)) {
@@ -161,9 +163,9 @@ class Sns implements MessengerClient
             'TopicArn' => $this->getArnFromName($topic),
             'Protocol' => $protocol,
             'Endpoint' => $endpoint,
-        ]);
+        ])->toArray();
 
-        return true;
+        return $subscribe['SubscriptionArn'] ?? '';
     }
 
     public function confirmSubscription(string $topic, string $token): bool
@@ -176,10 +178,12 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function unsubscribe(string $topic, string $subscriptionId): bool
+//    public function unsubscribe(string $topic, string $subscriptionId): bool
+    public function unsubscribe(string $subscriptionArn): bool
     {
         $this->snsClient->unsubscribe([
-            'SubscriptionArn' => $this->getArnFromName($topic).':'.$subscriptionId,
+//            'SubscriptionArn' => $this->getArnFromName($topic).':'.$subscriptionId,
+            'SubscriptionArn' => $subscriptionArn,
         ]);
 
         return true;

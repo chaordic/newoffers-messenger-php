@@ -45,16 +45,18 @@ class Messenger
         return $this->getClient()->confirmSubscription($topic, $token);
     }
 
-    public function unsubscribe(string $topic, string $subscription)
+//    public function unsubscribe(string $topic, string $subscription)
+    public function unsubscribe(string $subscriptionArn)
     {
-        return $this->getClient()->unsubscribe($topic, $subscription);
+//        return $this->getClient()->unsubscribe($topic, $subscription);
+        return $this->getClient()->unsubscribe($subscriptionArn);
     }
 
     public function publish(string $topic, array $message, $messageAttributes = [])
     {
         return $this->getClient()->publish($topic, $message, $messageAttributes);
     }
-    
+
     public function publishAsync(string $topic, array $message, $messageAttributes = [])
     {
         return $this->getClient()->publishAsync($topic, $message, $messageAttributes);
