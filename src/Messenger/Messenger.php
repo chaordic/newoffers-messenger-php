@@ -45,10 +45,8 @@ class Messenger
         return $this->getClient()->confirmSubscription($topic, $token);
     }
 
-//    public function unsubscribe(string $topic, string $subscription)
     public function unsubscribe(string $subscriptionArn)
     {
-//        return $this->getClient()->unsubscribe($topic, $subscription);
         return $this->getClient()->unsubscribe($subscriptionArn);
     }
 
