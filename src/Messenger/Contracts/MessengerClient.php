@@ -12,7 +12,7 @@ interface MessengerClient
 
     public function confirmSubscription(string $topic, string $token): bool;
 
-    public function unsubscribe(string $subscriptionArn): bool;
+    public function unsubscribe(string $topic, string $subscriptionId): bool;
 
     public function publish(string $topic, array $message, array $messageAttributes): bool;
 

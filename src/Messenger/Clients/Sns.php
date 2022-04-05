@@ -178,10 +178,10 @@ class Sns implements MessengerClient
         return true;
     }
 
-    public function unsubscribe(string $subscriptionArn): bool
+    public function unsubscribe(string $topic, string $subscriptionId): bool
     {
         $this->snsClient->unsubscribe([
-            'SubscriptionArn' => $subscriptionArn,
+            'SubscriptionArn' => $this->getArnFromName($topic).':'.$subscriptionId,
         ]);
 
         return true;
